@@ -98,8 +98,9 @@ class ReLULayer:
         # TODO: Implement forward pass
         # Hint: you'll need to save some information about X
         # to use it later in the backward pass
-        raise Exception("Not implemented!")
-
+        X = X.copy()
+        self.mask = X < 0
+        X[self.mask] = 0
         return X
 
     def backward(self, d_out):
@@ -116,7 +117,7 @@ class ReLULayer:
         """
         # TODO: Implement backward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        d_out[self.mask] = 0
 
         return d_out
 
@@ -134,7 +135,7 @@ class FullyConnectedLayer:
     def forward(self, X):
         # TODO: Implement forward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        return X @ self.W + self.B
 
 
     def backward(self, d_out):
@@ -159,7 +160,12 @@ class FullyConnectedLayer:
         # It should be pretty similar to linear classifier from
         # the previous assignment
 
-        raise Exception("Not implemented!")
+        d_input = np.zeros_like(self.X)
+        dW = self.X.T @ d_outs
+        dB = np.sum(d_out,axis=0)
+        self.W.grad += dW
+        self.b.grad += dB
+        d_input = d_out
 
         return d_input
 
