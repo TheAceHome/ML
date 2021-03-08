@@ -13,8 +13,6 @@ def softmax(predictions):
       probs, np array of the same shape as predictions -
         probability for every class, 0..1
     '''
-    # TODO implement softmax
-    # Your final implementation shouldn't have any loops
     z = predictions.copy()
     if predictions.ndim == 1:
         z = z.reshape(1, -1)
@@ -95,10 +93,7 @@ class ReLULayer:
         pass
 
     def forward(self, X):
-        # TODO: Implement forward pass
-        # Hint: you'll need to save some information about X
-        # to use it later in the backward pass
-        X = X.copy()
+       X = X.copy()
         self.mask = X < 0
         X[self.mask] = 0
         return X
@@ -115,8 +110,6 @@ class ReLULayer:
         d_result: np array (batch_size, num_features) - gradient
           with respect to input
         """
-        # TODO: Implement backward pass
-        # Your final implementation shouldn't have any loops
         d_out[self.mask] = 0
 
         return d_out
@@ -133,9 +126,8 @@ class FullyConnectedLayer:
         self.X = None
 
     def forward(self, X):
-        # TODO: Implement forward pass
-        # Your final implementation shouldn't have any loops
-        return X @ self.W + self.B
+        self.X = X.copy()
+        return np.dot(X, self.W.value) + self.B.value
 
 
     def backward(self, d_out):
@@ -152,22 +144,11 @@ class FullyConnectedLayer:
         d_result: np array (batch_size, n_input) - gradient
           with respect to input
         """
-        # TODO: Implement backward pass
-        # Compute both gradient with respect to input
-        # and gradients with respect to W and B
-        # Add gradients of W and B to their `grad` attribute
+       
 
-        # It should be pretty similar to linear classifier from
-        # the previous assignment
-
-        d_input = np.zeros_like(self.X)
-        dW = self.X.T @ d_outs
-        dB = np.sum(d_out,axis=0)
-        self.W.grad += dW
-        self.b.grad += dB
-        d_input = d_out
-
-        return d_input
+        self.W.grad += np.dot(self.X.T, d_out)
+        self.B.grad += np.sum(d_out, axis=0, keepdims=True)
+        return np.dot(d_out, self.W.value.T)
 
     def params(self):
         return {'W': self.W, 'B': self.B}
