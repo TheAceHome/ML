@@ -9,7 +9,6 @@ class TwoLayerNet:
     def __init__(self, n_input, n_output, hidden_layer_size, reg):
         """
         Initializes the neural network
-
         Arguments:
         n_input, int - dimension of the model input
         n_output, int - number of classes to predict
@@ -18,15 +17,14 @@ class TwoLayerNet:
         """
         self.reg = reg
         # TODO Create necessary layers
-        raise Exception("Not implemented!")
-        self.layers = []
-
+        self.first = FullyConnectedLayer(n_input, hidden_layer_size)
+        self.relu = ReLULayer()
+        self.second = FullyConnectedLayer(hidden_layer_size, n_output)
 
     def compute_loss_and_gradients(self, X, y):
         """
         Computes total loss and updates parameter gradients
         on a batch of training examples
-
         Arguments:
         X, np array (batch_size, input_features) - input data
         y, np array of int (batch_size) - classes
@@ -35,40 +33,50 @@ class TwoLayerNet:
         # clear parameter gradients aggregated from the previous pass
         # TODO Set parameter gradient to zeros
         # Hint: using self.params() might be useful!
-        raise Exception("Not implemented!")
-
+        for param in self.params().values():
+            param.grad = np.zeros_like(param.value)
+        
         # TODO Compute loss and fill param gradients
         # by running forward and backward passes through the model
-        
+        preds = self.first.forward(X)
+        preds = self.relu.forward(preds)
+        preds = self.second.forward(preds)
+
+        loss, grad = softmax_with_cross_entropy(preds, y)
+
+        grad = self.second.backward(grad)
+        grad = self.relu.backward(grad)
+        grad = self.first.backward(grad)
+
         # After that, implement l2 regularization on all params
         # Hint: self.params() is useful again!
-        raise Exception("Not implemented!")
+        for param in self.params().values():
+            loss_l2, grad_l2 = l2_regularization(param.value, self.reg)
+            loss += loss_l2
+            param.grad += grad_l2
 
         return loss
 
     def predict(self, X):
         """
         Produces classifier predictions on the set
-
         Arguments:
           X, np array (test_samples, num_features)
-
         Returns:
           y_pred, np.array of int (test_samples)
         """
         # TODO: Implement predict
         # Hint: some of the code of the compute_loss_and_gradients
         # can be reused
-        pred = np.zeros(X.shape[0], np.int)
+        preds = self.first.forward(X)
+        preds = self.relu.forward(preds)
+        preds = self.second.forward(preds)
 
-        raise Exception("Not implemented!")
-        return pred
+        probs = softmax(preds)
+        return np.argmax(probs, axis=1)
 
     def params(self):
-        result = {}
-
         # TODO Implement aggregating all of the params
 
-        raise Exception("Not implemented!")
-
-        return result
+        return {'first.W': self.first.W, 'first.B': self.first.B, 
+                'second.W': self.second.W, 'second.B': self.second.B}
